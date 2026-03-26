@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CuriosityHub</title>
+
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/5968/5968705.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+body{background:linear-gradient(135deg,#020617,#0f172a,#020617);color:white;overflow-x:hidden;}
+#particles-js{position:fixed;width:100%;height:100%;z-index:-1;}
+header{display:flex;justify-content:space-between;align-items:center;padding:20px 40px;background:rgba(0,0,0,0.6);backdrop-filter:blur(15px);}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo img{width:45px;border-radius:12px;box-shadow:0 0 20px #3b82f6;}
+button{
+  padding:10px 18px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(45deg,#22c55e,#3b82f6);
+  color:white;
+  cursor:pointer;
+  margin:5px;
+
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+button:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(59,130,246,0.4);
+}
+
+button:active{
+  transform: scale(0.94);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+}
+.container{padding:30px;max-width:1100px;margin:auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;}
+.card{
+  background:rgba(255,255,255,0.05);
+  padding:20px;
+  border-radius:20px;
+  backdrop-filter:blur(10px);
+
+  overflow:hidden;   /* ✅ prevents text from going outside */
+}
+.ai-card{
+  grid-column:span 2;
+  min-width:0; /* 🔥 VERY IMPORTANT FIX */
+}
+.ai-card{
+  transition: transform 0.4s ease;
+}
+
+.ai-card:active{
+  transform: scale(0.99);
+}
+.fact{
+  font-size:28px;
+  line-height:1.8;
+  letter-spacing:0.5px;
+  word-spacing:4px;
+
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
+
+  max-width:100%;
+  min-height:80px;
+
+  text-align:left;
+
+  text-shadow: 0 0 10px rgba(59,130,246,0.4);
+
+  opacity: 0; /* 🔥 start hidden */
+  transform: translateY(20px) scale(0.98);
+  filter: blur(6px);
+
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ENTER (new fact comes) */
+.fact.show{
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+
+  text-shadow: 0 0 20px rgba(59,130,246,0.6);
+
+  animation: smoothEnter 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+
+@keyframes smoothEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(25px) scale(0.96);
+    filter: blur(8px);
+  }
+  60% {
+    transform: translateY(-4px) scale(1.02); /* 🔥 bounce */
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* EXIT (old fact goes) */
+.fact.hide{
+  opacity: 0;
+  transform: translateY(10px) scale(0.97);
+  filter: blur(8px);
+}
+.fact:hover{
+  text-shadow: 0 0 30px rgba(59,130,246,0.9);
+  transition: 0.3s;
+}
+.export-box{background:linear-gradient(135deg,#0f172a,#1e293b);padding:30px;border-radius:20px;text-align:center;}
+.export-fact{font-size:28px;font-weight:600;}
+.brand{margin-top:20px;font-size:14px;color:#94a3b8;}
+.progress-bar{height:10px;background:#1e293b;border-radius:10px;margin-top:10px;}
+.progress{height:100%;background:linear-gradient(90deg,#22c55e,#3b82f6);width:0%;}
+.badge{display:inline-block;padding:6px 12px;border-radius:20px;background:#22c55e;margin:5px;font-size:12px;}
+.streak{color:#facc15;margin-top:10px;}
+input{padding:10px;border-radius:10px;border:none;margin:10px 0;width:100%;background:#1e293b;color:white;}
+
+.card{
+  transition: all 0.3s ease;
+}
+
+.card:hover{
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 0 25px rgba(59,130,246,0.4);
+}
+
+#confetti{
+  position:fixed;
+  width:100%;
+  height:100%;
+  background: radial-gradient(circle, #22c55e 10%, transparent 10%);
+  background-size: 20px 20px;
+  animation: confetti 1s linear infinite;
+}
+
+@keyframes confetti{
+  from{transform:translateY(0);}
+  to{transform:translateY(100px);}
+}
+</style>
+</head>
+
+<body>
+
+<div id="particles-js"></div> 
+
+<div id="loginBox" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#020617;display:flex;align-items:center;justify-content:center;z-index:9999;">
+  <div style="background:#0f172a;padding:30px;border-radius:20px;">
+    <h2>Login</h2>
+    <input id="username" placeholder="Enter name">
+    <button onclick="login()">Enter</button>
+  </div>
+</div>
+
+<header>
+<div class="logo">
+<img src="https://cdn-icons-png.flaticon.com/512/5968/5968705.png">
+<h2>CuriosityHub</h2>
+<p id="welcomeUser"></p>
+</div>
+</header>
+
+<div class="container">
+
+<div class="card ai-card">
+<h2>🤖 AI + Viral Fact Generator</h2>
+<p id="fact" class="fact">Click generate to get facts...</p>
+
+<button onclick="generateFact()">Generate</button>
+<button onclick="shareWhatsApp()">WhatsApp</button>
+<button onclick="copyFact()">Copy</button>
+<button onclick="downloadImage()">Download Image</button>
+<button onclick="shareInstagram()">Instagram</button>
+<button onclick="realAI()">AI Fact</button>
+<button onclick="logout()">Logout</button>
+<button id="autoBtn" onclick="autoMode()">Auto Mode</button>
+</div>
+
+<div class="card">
+<h3>🌍 Leaderboard</h3>
+<div id="leaderboard"></div>
+</div>
+
+<div class="card">
+<h3>🏆 Progress</h3>
+<p>Level: <span id="level">1</span></p>
+<div class="progress-bar"><div class="progress" id="progress"></div></div>
+<p id="xpText">XP: 0 / 100</p>
+<p class="streak">🔥 Streak: <span id="streak">0</span></p>
+</div>
+
+<div class="card">
+<h3>🎖️ Badges</h3>
+<div id="badges"></div>
+</div>
+
+<div class="card">
+<h3>📓 Notes</h3>
+<input id="noteInput" placeholder="Write something...">
+<button onclick="saveNote()">Save</button>
+<p id="savedNote"></p>
+</div>
+
+<div class="card">
+<h3>📜 History</h3>
+<div id="history"></div>
+</div>
+
+<div class="card">
+<h3>📊 Stats</h3>
+<p>Total Facts: <span id="count">0</span></p>
+</div>
+
+<div id="export" class="export-box" style="position:absolute;left:-9999px;top:-9999px;width:600px;">
+<div id="exportFact" class="export-fact"></div>
+<div class="brand">CuriosityHub 🚀</div>
+</div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+// Import the functions you need from the SDKs you need
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCEmHkdTW7AQAQ1EO3YX1m5iykdRjWHk4M",
+  authDomain: "curiosityhub-806ab.firebaseapp.com",
+  projectId: "curiosityhub-806ab",
+  storageBucket: "curiosityhub-806ab.firebasestorage.app",
+  messagingSenderId: "847636475669",
+  appId: "1:847636475669:web:5ebd4328e1972e29d1031c",
+  databaseURL: "https://curiosityhub-806ab-default-rtdb.asia-southeast1.firebasedatabase.app"
+};
+
+// Initialize Firebase
+
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// 🔊 SOUND
+const clickSound = new Audio("https://www.soundjay.com/buttons/sounds/button-16.mp3");
+
+// PARTICLES
+if(window.particlesJS){
+  particlesJS("particles-js",{particles:{number:{value:120},size:{value:3}}});
+}
+
+// 🔥 MANY FACTS
+const facts = [
+"🚀 Space is completely silent because there is no air to carry sound.",
+"🧠 Your brain generates enough electricity to power a small bulb.",
+"🌊 Water can boil and freeze at the same time under special conditions.",
+"🌌 There are more stars in the universe than grains of sand on Earth.",
+"⚡ Lightning is five times hotter than the surface of the Sun.",
+
+// 🔥 NEW FACTS BELOW
+
+"🦁 A lion’s roar can be heard from 8 km away.",
+"🐬 Dolphins have names for each other.",
+"🌍 Earth is not perfectly round, it’s slightly flattened at the poles.",
+"🧠 Your brain uses about 20% of your body’s energy.",
+"🌙 The Moon has moonquakes similar to earthquakes.",
+"🪐 Jupiter is so big that all planets could fit inside it.",
+"🐧 Penguins propose with pebbles.",
+"🌡️ The hottest place on Earth can reach over 56°C.",
+"🦅 Eagles can see 4–5 times better than humans.",
+"🌊 95% of the ocean is still unexplored.",
+"🧬 Every human shares 99.9% DNA with each other.",
+"🐢 Turtles can breathe through their butts (yes, really).",
+"🌪️ A tornado can destroy a house in seconds.",
+"💡 Humans glow in the dark (very slightly).",
+"🌳 The Amazon rainforest produces 20% of Earth’s oxygen.",
+"🦑 Giant squids have eyes as big as basketballs.",
+"🌍 One day on Venus is longer than one year on Venus.",
+"🐝 Bees can recognize human faces.",
+"🧊 Antarctica is the driest desert on Earth.",
+"🧠 Memories are not stored in one place in the brain.",
+"🐙 Octopuses can solve puzzles and open jars.",
+"🌌 The universe is still expanding every second.",
+"🦒 Giraffes have the same number of neck bones as humans.",
+"🌊 Waves can travel across entire oceans.",
+"🧬 Your body replaces most cells every 7–10 years.",
+"🐸 Frogs can freeze and come back to life.",
+"🌞 The Sun makes up 99.86% of the solar system’s mass.",
+"🐅 Tigers have striped skin, not just striped fur.",
+"🌍 Gravity is slightly weaker at the equator.",
+"🧠 You have more brain connections than stars in the Milky Way.",
+"🦇 Bats are the only mammals that can truly fly.",
+"🌊 Sound travels faster in water than in air.",
+"🐘 Elephants can recognize themselves in mirrors.",
+"🌋 Volcanoes can create new land.",
+"🧲 Earth acts like a giant magnet.",
+"🌌 There may be more universes beyond ours.",
+"🐦 Some birds can sleep while flying.",
+"🌡️ Your body temperature changes throughout the day.",
+"🦈 Sharks can detect electrical signals in water.",
+"🌍 Continents move slowly every year.",
+"🐜 Ants can lift 50 times their body weight."
+];
+
+// STORAGE
+let lastClick = 0;
+let xp=+localStorage.getItem("xp")||0;
+let level=+localStorage.getItem("level")||1;
+let badges=JSON.parse(localStorage.getItem("badges")||"[]");
+let streak=+localStorage.getItem("streak")||0;
+let lastLogin=localStorage.getItem("lastLogin");
+let count=+localStorage.getItem("count")||0;
+
+// FIXED USER INIT 🔥
+let user=localStorage.getItem("user");
+let userId=localStorage.getItem("userId");
+
+if(!userId){
+  userId="user_"+Math.random().toString(36).substring(2,9);
+  localStorage.setItem("userId",userId);
+}
+
+// TYPE EFFECT
+
+let typingInterval;
+
+function typeText(text){
+  clearInterval(typingInterval);
+
+  let el = document.getElementById("fact");
+
+  // EXIT
+  el.classList.remove("show");
+  el.classList.add("hide");
+
+  setTimeout(()=>{
+
+    el.innerHTML = "";
+
+    // FORCE reflow (VERY IMPORTANT)
+    el.offsetHeight;
+
+    // ENTER
+    el.classList.remove("hide");
+    el.classList.add("show");
+
+    let i = 0;
+
+    typingInterval = setInterval(()=>{
+      if(i < text.length){
+        el.innerHTML = text.substring(0, i+1);
+        i++;
+      } else {
+        clearInterval(typingInterval);
+      }
+    }, 18); // smoother typing
+
+  }, 300); // slightly slower = more premium
+}
+// UI
+function updateUI(){
+document.getElementById("xpText").innerText=`XP: ${xp}/100`;
+document.getElementById("level").innerText=level;
+document.getElementById("progress").style.width=xp+"%";
+document.getElementById("count").innerText=count;
+document.getElementById("streak").innerText=streak;
+document.getElementById("badges").innerHTML=badges.map(b=>`<span class='badge'>${b}</span>`).join("");
+}
+
+// LOGIN FIX
+if(user){
+document.getElementById("loginBox").style.display="none";
+document.getElementById("welcomeUser").innerText="👋 "+user;
+}
+
+// STREAK
+function updateStreak(){
+  let today=new Date().toDateString();
+
+  if(lastLogin!==today){
+    streak++;
+    
+    if(streak % 5 === 0){
+      xp += 50;
+      alert("🔥 Streak Bonus +50 XP!");
+    }
+
+    localStorage.setItem("streak",streak);
+    localStorage.setItem("lastLogin",today);
+  }
+}
+
+// INIT
+window.onload = () => {
+  updateStreak();
+  dailyReward();   // 🔥 ADD THIS
+  updateUI();
+generateFact();
+  updateHistory(); // 🔥 ADD THIS (history not loading now)
+  if(user) updateLeaderboard();
+let saved = localStorage.getItem("note");
+if(saved){
+  document.getElementById("savedNote").innerText = "Saved: " + saved;
+}
+};
+
+// LOGIN
+function login(){
+let name=document.getElementById("username").value.trim();
+if(!name||name.length<3){alert("Enter valid name");return;}
+localStorage.setItem("user",name);
+location.reload();
+}
+
+// LEADERBOARD
+async function updateLeaderboard(){
+if(!user) return;
+
+// Save data
+await set(ref(db, 'leaderboard/' + userId), {
+  name: user,
+  xp: xp
+});
+
+// Fetch data
+const snapshot = await get(child(ref(db), 'leaderboard'));
+let arr = [];
+
+if(snapshot.exists()){
+  const data = snapshot.val();
+  for(let key in data){
+    arr.push(data[key]);
+  }
+}
+
+// Sort
+arr.sort((a,b)=>b.xp-a.xp);
+
+// Show top 5
+let html="";
+arr.slice(0,5).forEach((u,i)=>{
+  html+=`<p>🏅 #${i+1} ${u.name} - ${u.xp} XP</p>`;
+});
+
+document.getElementById("leaderboard").innerHTML=html;
+}
+
+function generateFact(){
+  if(!user){document.getElementById("loginBox").style.display="flex";return;}
+  let now=Date.now();
+  if(now-lastClick<1000)return;
+  lastClick=now;
+
+  clickSound.play();
+
+
+document.querySelector("h2").innerText = randomEmoji() + " AI + Viral Fact Generator";
+
+  let fact=facts[Math.floor(Math.random()*facts.length)];
+  typeText(fact);
+
+  saveHistory(fact); // 🔥 NEW
+
+  count++;
+  localStorage.setItem("count",count);
+
+  addXP(10);
+  updateUI();
+  updateLeaderboard();
+  updateHistory(); // 🔥 NEW
+}
+
+// EXTRA FUNCTIONS (FIXED)
+function logout(){localStorage.removeItem("user");location.reload();}
+function realAI(){alert("Coming soon 🚀");}
+function shareWhatsApp(){
+let text=document.getElementById("fact").innerText;
+window.open(`https://wa.me/?text=${encodeURIComponent(text)}`);
+}
+function copyFact(){
+navigator.clipboard.writeText(document.getElementById("fact").innerText);
+alert("Copied");
+}
+function downloadImage(){
+let text=document.getElementById("fact").innerText;
+document.getElementById("exportFact").innerText=text;
+
+html2canvas(document.getElementById("export")).then(canvas=>{
+let link=document.createElement("a");
+link.download="curiosityhub.png";
+link.href=canvas.toDataURL();
+link.click();
+});
+}
+function shareInstagram(){
+downloadImage();
+alert("Upload image to Instagram 🚀");
+}
+function saveNote(){
+let note=document.getElementById("noteInput").value;
+localStorage.setItem("note",note);
+document.getElementById("savedNote").innerText="Saved: "+note;
+}
+
+window.generateFact = generateFact;
+window.login = login;
+window.logout = logout;
+window.shareWhatsApp = shareWhatsApp;
+window.copyFact = copyFact;
+window.downloadImage = downloadImage;
+window.shareInstagram = shareInstagram;
+window.saveNote = saveNote;
+window.realAI = realAI;
+
+function dailyReward(){
+  let lastReward = localStorage.getItem("rewardDate");
+  let today = new Date().toDateString();
+
+  if(lastReward !== today){
+    xp += 20;
+    alert("🎁 Daily Reward +20 XP!");
+    localStorage.setItem("rewardDate", today);
+    localStorage.setItem("xp", xp);
+  }
+}
+
+
+
+function addXP(a){
+  if(a>20)return;
+
+  xp += a;
+
+  if(xp >= 100){
+    xp = 0;
+    level++;
+    badges.push("Level " + level);
+
+    // 🎉 Confetti
+    document.body.innerHTML += "<div id='confetti'></div>";
+    setTimeout(()=>{
+      let c = document.getElementById("confetti");
+      if(c) c.remove();
+    },2000);
+
+    // ⚡ Background flash
+    document.body.style.background="linear-gradient(45deg,#22c55e,#3b82f6)";
+    setTimeout(()=>{document.body.style.background="";},500);
+  }
+
+  localStorage.setItem("xp",xp);
+  localStorage.setItem("level",level);
+}
+
+let autoInterval;
+
+
+let history = JSON.parse(localStorage.getItem("history")||"[]");
+
+function saveHistory(fact){
+  history.unshift(fact);
+  history = history.slice(0,10);
+  localStorage.setItem("history", JSON.stringify(history));
+}
+
+function updateHistory(){
+  document.getElementById("history").innerHTML =
+  history.map(f=>`<p onclick="typeText(\`${f}\`)">${f}</p>`).join("");
+}
+
+
+const emojis = ["🚀","🧠","🌍","⚡","🪐","🔥"];
+
+function randomEmoji(){
+  return emojis[Math.floor(Math.random()*emojis.length)];
+}
+function autoMode(){
+  let btn = document.getElementById("autoBtn");
+
+  if(autoInterval){
+    clearInterval(autoInterval);
+    autoInterval = null;
+    btn.innerText = "Auto Mode OFF";
+  } else {
+    autoInterval = setInterval(generateFact, 3000);
+    btn.innerText = "Auto Mode ON 🔥";
+  }
+}
+</script>
+
+</body>
+</html>
