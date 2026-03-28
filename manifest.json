@@ -1,1 +1,15 @@
-
+{
+  "name": "CuriosityHub",
+  "short_name": "Curiosity",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/5968/5968705.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
